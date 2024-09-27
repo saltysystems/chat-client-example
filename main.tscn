@@ -28,13 +28,14 @@ offset_right = 640.0
 offset_bottom = 440.0
 color = Color(0.136826, 0.136826, 0.136826, 1)
 
-[node name="TextEdit" type="TextEdit" parent="."]
+[node name="LineEdit" type="LineEdit" parent="."]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -41.0
-offset_right = 640.0
-offset_bottom = -1.0
+offset_left = 2.0
+offset_top = -40.0
+offset_right = 638.0
+offset_bottom = -2.0
 grow_vertical = 0
 placeholder_text = "Enter a message"
