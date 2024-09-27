@@ -39,3 +39,5 @@ offset_right = 638.0
 offset_bottom = -2.0
 grow_vertical = 0
 placeholder_text = "Enter a message"
+
+[connection signal="text_submitted" from="LineEdit" to="." method="_on_line_edit_text_submitted"]
