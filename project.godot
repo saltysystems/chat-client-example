@@ -11,8 +11,13 @@ config_version=5
 [application]
 
 config/name="Chat Client Example"
-config/features=PackedStringArray("4.3", "GL Compatibility")
+config/features=PackedStringArray("4.2", "Double Precision", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[autoload]
+
+Overworld="*res://scripts/libow4.gd"
+GameManager="*res://scripts/game_manager.gd"
 
 [display]
 

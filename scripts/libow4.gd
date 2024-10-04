@@ -1,7 +1,7 @@
 extends Node
 
-const Chat_pb = preload('chat_pb.gd')
 const Overworld_pb = preload('overworld_pb.gd')
+const Chat_pb = preload('chat_pb.gd')
 
 var _enet_peer = ENetMultiplayerPeer.new()
 var _ws_peer = WebSocketPeer.new()
@@ -26,8 +26,8 @@ enum transport_mode {
 # These are merely aliases for convenience. We should not leak Protobuf
 # details to the consumer of the library
 
-# via overworld_pb
 # via chat_pb
+# via overworld_pb
 
 
 ###########################################################################
@@ -37,9 +37,11 @@ enum transport_mode {
 signal server_connected()
 signal server_disconnected()
 
+signal server_channel_msg(handle,text)
 signal server_session_pong(latency)
 signal server_session_beacon(id)
 signal server_session_new(id,reconnect_token)
+signal server_sync(handles)
 
 
 ###########################################################################
@@ -76,6 +78,125 @@ func route(packet):
 ###########################################################################
 
 # Submsgs
+func unpack_chat(object):
+	if object.has_join():
+		if debug:
+			print('[DEBUG] Processing a join packet')
+		var d = {}
+		d = unpack_join(object.get_join())
+		emit_signal('server_join',d['handle'])
+	elif object.has_part():
+		if debug:
+			print('[DEBUG] Processing a part packet')
+		var d = {}
+		d = unpack_part(object.get_part())
+		emit_signal('server_part',)
+	elif object.has_channel_msg():
+		if debug:
+			print('[DEBUG] Processing a channel_msg packet')
+		var d = {}
+		d = unpack_channel_msg(object.get_channel_msg())
+		emit_signal('server_channel_msg',d['handle'], d['text'])
+	elif object.has_sync():
+		if debug:
+			print('[DEBUG] Processing a sync packet')
+		var d = {}
+		d = unpack_sync(object.get_sync())
+		emit_signal('server_sync',d['handles'])
+
+func unpack_join(object):
+	if typeof(object) == TYPE_ARRAY and object != []:
+		var array = []
+		for obj in object:
+			var handle
+			if obj.has_handle():
+				handle = obj.get_handle()
+			else:
+				handle = null
+			var dict = {'handle': handle, }
+			array.append(dict)
+		return array
+	elif typeof(object) == TYPE_ARRAY and object == []:
+		return []
+	else:
+		if object: 
+			var handle
+			if object.has_handle():
+				handle = object.get_handle()
+			else:
+				handle = null
+			var dict = {'handle': handle, }
+			return dict
+		else:
+			return {}
+func unpack_part(object):
+	if typeof(object) == TYPE_ARRAY and object != []:
+		var array = []
+		for obj in object:
+			var dict = {}
+			array.append(dict)
+		return array
+	elif typeof(object) == TYPE_ARRAY and object == []:
+		return []
+	else:
+		if object: 
+			var dict = {}
+			return dict
+		else:
+			return {}
+func unpack_channel_msg(object):
+	if typeof(object) == TYPE_ARRAY and object != []:
+		var array = []
+		for obj in object:
+			var text
+			if obj.has_text():
+				text = obj.get_text()
+			else:
+				text = null
+			var handle
+			if obj.has_handle():
+				handle = obj.get_handle()
+			else:
+				handle = null
+			var dict = {'handle': handle, 'text': text, }
+			array.append(dict)
+		return array
+	elif typeof(object) == TYPE_ARRAY and object == []:
+		return []
+	else:
+		if object: 
+			var text
+			if object.has_text():
+				text = object.get_text()
+			else:
+				text = null
+			var handle
+			if object.has_handle():
+				handle = object.get_handle()
+			else:
+				handle = null
+			var dict = {'handle': handle, 'text': text, }
+			return dict
+		else:
+			return {}
+func unpack_sync(object):
+	if typeof(object) == TYPE_ARRAY and object != []:
+		var array = []
+		for obj in object:
+			var handles = obj.get_handles()
+			var dict = {'handles': handles, }
+			array.append(dict)
+		return array
+	elif typeof(object) == TYPE_ARRAY and object == []:
+		return []
+	else:
+		if object: 
+			var handles = object.get_handles()
+			var dict = {'handles': handles, }
+			return dict
+		else:
+			return {}
+
 func unpack_overworld(object):
 	if object.has_session_request():
 		if debug:
@@ -204,102 +325,6 @@ func unpack_session_pong(object):
 		else:
 			return {}
 
-func unpack_chat(object):
-	if object.has_join():
-		if debug:
-			print('[DEBUG] Processing a join packet')
-		var d = {}
-		d = unpack_join(object.get_join())
-		emit_signal('server_join',d['handle'])
-	elif object.has_part():
-		if debug:
-			print('[DEBUG] Processing a part packet')
-		var d = {}
-		d = unpack_part(object.get_part())
-		emit_signal('server_part',d['handle'])
-	elif object.has_channel_msg():
-		if debug:
-			print('[DEBUG] Processing a channel_msg packet')
-		var d = {}
-		d = unpack_channel_msg(object.get_channel_msg())
-		emit_signal('server_channel_msg',d['text'])
-
-func unpack_join(object):
-	if typeof(object) == TYPE_ARRAY and object != []:
-		var array = []
-		for obj in object:
-			var handle
-			if obj.has_handle():
-				handle = obj.get_handle()
-			else:
-				handle = null
-			var dict = {'handle': handle, }
-			array.append(dict)
-		return array
-	elif typeof(object) == TYPE_ARRAY and object == []:
-		return []
-	else:
-		if object: 
-			var handle
-			if object.has_handle():
-				handle = object.get_handle()
-			else:
-				handle = null
-			var dict = {'handle': handle, }
-			return dict
-		else:
-			return {}
-func unpack_part(object):
-	if typeof(object) == TYPE_ARRAY and object != []:
-		var array = []
-		for obj in object:
-			var handle
-			if obj.has_handle():
-				handle = obj.get_handle()
-			else:
-				handle = null
-			var dict = {'handle': handle, }
-			array.append(dict)
-		return array
-	elif typeof(object) == TYPE_ARRAY and object == []:
-		return []
-	else:
-		if object: 
-			var handle
-			if object.has_handle():
-				handle = object.get_handle()
-			else:
-				handle = null
-			var dict = {'handle': handle, }
-			return dict
-		else:
-			return {}
-func unpack_channel_msg(object):
-	if typeof(object) == TYPE_ARRAY and object != []:
-		var array = []
-		for obj in object:
-			var text
-			if obj.has_text():
-				text = obj.get_text()
-			else:
-				text = null
-			var dict = {'text': text, }
-			array.append(dict)
-		return array
-	elif typeof(object) == TYPE_ARRAY and object == []:
-		return []
-	else:
-		if object: 
-			var text
-			if object.has_text():
-				text = object.get_text()
-			else:
-				text = null
-			var dict = {'text': text, }
-			return dict
-		else:
-			return {}
-
 
 # Unmarshall
 func _server_chat(packet):
@@ -323,6 +348,22 @@ func _server_overworld(packet):
 ###########################################################################
 
 # Marshall submsgs
+func pack_sync(obj, ref):
+	ref.set_handles(obj.handles)
+
+func pack_channel_msg(obj, ref):
+	ref.set_text(obj.text)
+	ref.set_handle(obj.handle)
+
+func pack_part(obj, ref):
+	pass
+func pack_join(obj, ref):
+	ref.set_handle(obj.handle)
+
+func pack_chat(obj, ref):
+	ref.set_msg(obj.msg)
+
+
 func pack_session_pong(obj, ref):
 	ref.set_latency(obj.latency)
 
@@ -343,21 +384,22 @@ func pack_overworld(obj, ref):
 	ref.set_msg(obj.msg)
 
 
-func pack_channel_msg(obj, ref):
-	ref.set_text(obj.text)
-
-func pack_part(obj, ref):
-	ref.set_handle(obj.handle)
-
-func pack_join(obj, ref):
-	ref.set_handle(obj.handle)
-
-func pack_chat(obj, ref):
-	ref.set_msg(obj.msg)
-
-
 
 # Marshall 
+func channel_msg(handle = null, text = ''):
+	var m = Chat_pb.chat.new()
+	var n = m.new_channel_msg()
+	text=text
+	if text:
+		n.set_text(text)
+	handle=handle
+	if handle:
+		n.set_handle(handle)
+	var payload = m.to_bytes()
+	_send_message(payload, Prefix.CHAT, 'reliable', 0)
+	if debug:
+		print('[INFO] Send a channel_msg packet')
+
 func session_ping(id: int):
 	var m = Overworld_pb.overworld.new()
 	var n = m.new_session_ping()
@@ -389,12 +431,9 @@ func join(handle = ''):
 	if debug:
 		print('[INFO] Send a join packet')
 
-func part(handle = ''):
+func part():
 	var m = Chat_pb.chat.new()
 	var n = m.new_part()
-	handle=handle
-	if handle:
-		n.set_handle(handle)
 	var payload = m.to_bytes()
 	_send_message(payload, Prefix.CHAT, 'reliable', 0)
 	if debug:
@@ -528,6 +567,4 @@ func _connected(proto = ""):
 
 func _on_session_beacon(id):
 	# Used for latency measurements
-	if debug:
-		print("[DEBUG] Processing a session beacon packet")
 	session_ping(id)

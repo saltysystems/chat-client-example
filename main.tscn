@@ -12,21 +12,39 @@ grow_vertical = 2
 script = ExtResource("1_xqjeb")
 metadata/_edit_lock_ = true
 
-[node name="RichTextLabel" type="RichTextLabel" parent="."]
+[node name="ChatWindow" type="RichTextLabel" parent="."]
 layout_mode = 1
-offset_right = 640.0
+offset_right = 480.0
 offset_bottom = 440.0
 focus_mode = 2
 bbcode_enabled = true
-text = "Hello, world!"
 scroll_following = true
 selection_enabled = true
 
-[node name="ColorRect" type="ColorRect" parent="RichTextLabel"]
+[node name="ColorRect" type="ColorRect" parent="ChatWindow"]
+show_behind_parent = true
 layout_mode = 0
-offset_right = 640.0
-offset_bottom = 440.0
+offset_right = 480.0
+offset_bottom = 438.0
 color = Color(0.136826, 0.136826, 0.136826, 1)
+
+[node name="UserList" type="RichTextLabel" parent="."]
+layout_mode = 1
+offset_left = 481.0
+offset_right = 639.0
+offset_bottom = 440.0
+focus_mode = 2
+bbcode_enabled = true
+scroll_following = true
+selection_enabled = true
+
+[node name="ColorRect" type="ColorRect" parent="UserList"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = 1.0
+offset_right = 159.0
+offset_bottom = 438.0
+color = Color(0.180392, 0.180392, 0.180392, 1)
 
 [node name="LineEdit" type="LineEdit" parent="."]
 layout_mode = 1

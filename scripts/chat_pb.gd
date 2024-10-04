@@ -683,6 +683,12 @@ class chat:
 		service.func_ref = Callable(self, "new_channel_msg")
 		data[_channel_msg.tag] = service
 		
+		_sync = PBField.new("sync", PB_DATA_TYPE.MESSAGE, PB_RULE.OPTIONAL, 4, false, DEFAULT_VALUES_2[PB_DATA_TYPE.MESSAGE])
+		service = PBServiceField.new()
+		service.field = _sync
+		service.func_ref = Callable(self, "new_sync")
+		data[_sync.tag] = service
+		
 	var data = {}
 	
 	var _join: PBField
@@ -701,6 +707,8 @@ class chat:
 		data[2].state = PB_SERVICE_STATE.UNFILLED
 		_channel_msg.value = DEFAULT_VALUES_2[PB_DATA_TYPE.MESSAGE]
 		data[3].state = PB_SERVICE_STATE.UNFILLED
+		_sync.value = DEFAULT_VALUES_2[PB_DATA_TYPE.MESSAGE]
+		data[4].state = PB_SERVICE_STATE.UNFILLED
 		_join.value = join.new()
 		return _join.value
 	
@@ -720,6 +728,8 @@ class chat:
 		data[2].state = PB_SERVICE_STATE.FILLED
 		_channel_msg.value = DEFAULT_VALUES_2[PB_DATA_TYPE.MESSAGE]
 		data[3].state = PB_SERVICE_STATE.UNFILLED
+		_sync.value = DEFAULT_VALUES_2[PB_DATA_TYPE.MESSAGE]
+		data[4].state = PB_SERVICE_STATE.UNFILLED
 		_part.value = part.new()
 		return _part.value
 	
@@ -739,8 +749,31 @@ class chat:
 		_part.value = DEFAULT_VALUES_2[PB_DATA_TYPE.MESSAGE]
 		data[2].state = PB_SERVICE_STATE.UNFILLED
 		data[3].state = PB_SERVICE_STATE.FILLED
+		_sync.value = DEFAULT_VALUES_2[PB_DATA_TYPE.MESSAGE]
+		data[4].state = PB_SERVICE_STATE.UNFILLED
 		_channel_msg.value = channel_msg.new()
 		return _channel_msg.value
+	
+	var _sync: PBField
+	func has_sync() -> bool:
+		if _sync.value != null:
+			return true
+		return false
+	func get_sync() -> sync:
+		return _sync.value
+	func clear_sync() -> void:
+		data[4].state = PB_SERVICE_STATE.UNFILLED
+		_sync.value = DEFAULT_VALUES_2[PB_DATA_TYPE.MESSAGE]
+	func new_sync() -> sync:
+		_join.value = DEFAULT_VALUES_2[PB_DATA_TYPE.MESSAGE]
+		data[1].state = PB_SERVICE_STATE.UNFILLED
+		_part.value = DEFAULT_VALUES_2[PB_DATA_TYPE.MESSAGE]
+		data[2].state = PB_SERVICE_STATE.UNFILLED
+		_channel_msg.value = DEFAULT_VALUES_2[PB_DATA_TYPE.MESSAGE]
+		data[3].state = PB_SERVICE_STATE.UNFILLED
+		data[4].state = PB_SERVICE_STATE.FILLED
+		_sync.value = sync.new()
+		return _sync.value
 	
 	func _to_string() -> String:
 		return PBPacker.message_to_string(data)
@@ -812,25 +845,7 @@ class part:
 	func _init():
 		var service
 		
-		_handle = PBField.new("handle", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 1, false, DEFAULT_VALUES_2[PB_DATA_TYPE.STRING])
-		service = PBServiceField.new()
-		service.field = _handle
-		data[_handle.tag] = service
-		
 	var data = {}
-	
-	var _handle: PBField
-	func has_handle() -> bool:
-		if _handle.value != null:
-			return true
-		return false
-	func get_handle() -> String:
-		return _handle.value
-	func clear_handle() -> void:
-		data[1].state = PB_SERVICE_STATE.UNFILLED
-		_handle.value = DEFAULT_VALUES_2[PB_DATA_TYPE.STRING]
-	func set_handle(value : String) -> void:
-		_handle.value = value
 	
 	func _to_string() -> String:
 		return PBPacker.message_to_string(data)
@@ -857,12 +872,30 @@ class channel_msg:
 	func _init():
 		var service
 		
-		_text = PBField.new("text", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 1, false, DEFAULT_VALUES_2[PB_DATA_TYPE.STRING])
+		_handle = PBField.new("handle", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 1, false, DEFAULT_VALUES_2[PB_DATA_TYPE.STRING])
+		service = PBServiceField.new()
+		service.field = _handle
+		data[_handle.tag] = service
+		
+		_text = PBField.new("text", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 2, false, DEFAULT_VALUES_2[PB_DATA_TYPE.STRING])
 		service = PBServiceField.new()
 		service.field = _text
 		data[_text.tag] = service
 		
 	var data = {}
+	
+	var _handle: PBField
+	func has_handle() -> bool:
+		if _handle.value != null:
+			return true
+		return false
+	func get_handle() -> String:
+		return _handle.value
+	func clear_handle() -> void:
+		data[1].state = PB_SERVICE_STATE.UNFILLED
+		_handle.value = DEFAULT_VALUES_2[PB_DATA_TYPE.STRING]
+	func set_handle(value : String) -> void:
+		_handle.value = value
 	
 	var _text: PBField
 	func has_text() -> bool:
@@ -872,10 +905,51 @@ class channel_msg:
 	func get_text() -> String:
 		return _text.value
 	func clear_text() -> void:
-		data[1].state = PB_SERVICE_STATE.UNFILLED
+		data[2].state = PB_SERVICE_STATE.UNFILLED
 		_text.value = DEFAULT_VALUES_2[PB_DATA_TYPE.STRING]
 	func set_text(value : String) -> void:
 		_text.value = value
+	
+	func _to_string() -> String:
+		return PBPacker.message_to_string(data)
+		
+	func to_bytes() -> PackedByteArray:
+		return PBPacker.pack_message(data)
+		
+	func from_bytes(bytes : PackedByteArray, offset : int = 0, limit : int = -1) -> int:
+		var cur_limit = bytes.size()
+		if limit != -1:
+			cur_limit = limit
+		var result = PBPacker.unpack_message(data, bytes, offset, cur_limit)
+		if result == cur_limit:
+			if PBPacker.check_required(data):
+				if limit == -1:
+					return PB_ERR.NO_ERRORS
+			else:
+				return PB_ERR.REQUIRED_FIELDS
+		elif limit == -1 && result > 0:
+			return PB_ERR.PARSE_INCOMPLETE
+		return result
+	
+class sync:
+	func _init():
+		var service
+		
+		_handles = PBField.new("handles", PB_DATA_TYPE.STRING, PB_RULE.REPEATED, 1, false, [])
+		service = PBServiceField.new()
+		service.field = _handles
+		data[_handles.tag] = service
+		
+	var data = {}
+	
+	var _handles: PBField
+	func get_handles() -> Array:
+		return _handles.value
+	func clear_handles() -> void:
+		data[1].state = PB_SERVICE_STATE.UNFILLED
+		_handles.value = []
+	func add_handles(value : String) -> void:
+		_handles.value.append(value)
 	
 	func _to_string() -> String:
 		return PBPacker.message_to_string(data)
