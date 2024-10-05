@@ -9,33 +9,67 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 script = ExtResource("1_xqjeb")
+net_mode = "WebSocket"
 metadata/_edit_lock_ = true
 
-[node name="RichTextLabel" type="RichTextLabel" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
-offset_right = 640.0
-offset_bottom = 440.0
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChatWindow" type="RichTextLabel" parent="VBoxContainer/HBoxContainer"]
+layout_direction = 2
+layout_mode = 2
+size_flags_horizontal = 3
 focus_mode = 2
 bbcode_enabled = true
-text = "Hello, world!"
 scroll_following = true
 selection_enabled = true
 
-[node name="ColorRect" type="ColorRect" parent="RichTextLabel"]
-layout_mode = 0
-offset_right = 640.0
-offset_bottom = 440.0
-color = Color(0.136826, 0.136826, 0.136826, 1)
-
-[node name="LineEdit" type="LineEdit" parent="."]
+[node name="BackGround" type="ColorRect" parent="VBoxContainer/HBoxContainer/ChatWindow"]
+show_behind_parent = true
 layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 2.0
-offset_top = -40.0
-offset_right = 638.0
-offset_bottom = -2.0
-grow_vertical = 0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.105882, 0.105882, 0.105882, 1)
+
+[node name="UserList" type="RichTextLabel" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+focus_mode = 2
+bbcode_enabled = true
+scroll_following = true
+selection_enabled = true
+
+[node name="Background" type="ColorRect" parent="VBoxContainer/HBoxContainer/UserList"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.101961, 0.101961, 0.101961, 1)
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer"]
+layout_mode = 2
 placeholder_text = "Enter a message"
+
+[connection signal="text_submitted" from="VBoxContainer/LineEdit" to="." method="_on_line_edit_text_submitted"]
