@@ -1,4 +1,5 @@
 # About
+![Screenshot of the Chat Demo](chat.png)
 
 This chat demo client is designed to be used with an 
 [Overworld](https://github.com/saltysystems/overworld) 
