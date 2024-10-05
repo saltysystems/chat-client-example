@@ -11,13 +11,14 @@ config_version=5
 [application]
 
 config/name="Chat Client Example"
+run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.2", "Double Precision", "GL Compatibility")
+boot_splash/bg_color=Color(0.054902, 0.054902, 0.054902, 1)
 config/icon="res://icon.svg"
 
 [autoload]
 
 Overworld="*res://scripts/libow4.gd"
-GameManager="*res://scripts/game_manager.gd"
 
 [display]
 
