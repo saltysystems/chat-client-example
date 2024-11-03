@@ -4,7 +4,7 @@ const ENET_PORT = 4483  # ENet
 const WEBSOCKET_PORT = 4433
 const WEBSOCKET_SECURE_PORT = 4434
 
-enum state {NOT_CONNECTED, CONNECTED, JOINED, PLAYING} 
+enum state {NOT_CONNECTED, CONNECTED, JOINED, PLAYING}
 @export_enum("ENet", "WebSocket", "WebSocket Secure") var net_mode: String = "ENet"
 @export var server_address = "<your_ip_or_hostname>"
 
@@ -12,7 +12,7 @@ var session_id
 var session_state = state.NOT_CONNECTED
 var reconnect_token
 
-var handle = "Soandso" + str(randi() % 100)
+@export var handle = "Soandso" + str(randi() % 100)
 var users = []
 
 # Called when the node enters the scene tree for the first time.
@@ -23,7 +23,7 @@ func _ready():
 	Overworld.server_sync.connect(self._on_sync)
 	Overworld.server_channel_msg.connect(self._on_channel_msg)
 	net_connect(handle)
-	
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
@@ -58,7 +58,7 @@ func _on_server_disconnect() -> void:
 func _on_sync(handles: Array):
 	session_state = state.PLAYING
 	redraw_user_list(handles)
-	
+
 func _on_channel_msg(handle: String, msg: String):
 	$VBoxContainer/HBoxContainer/ChatWindow.text += "<" + handle + "> " + msg + "\n"
 
@@ -95,4 +95,3 @@ func try_clean_disconnect():
 		Overworld.ws_disconnect()
 	elif net_mode == 'WebSocket Secure':
 		Overworld.wss_disconnect()
-
